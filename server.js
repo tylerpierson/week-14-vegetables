@@ -3,18 +3,18 @@ const express = require('express')
 const mongoose = require('mongoose')
 const jsxEngine = require('jsx-view-engine')
 const PORT = process.env.PORT || 3000
-// const Vegetables = require('./models/vegetables')
+const Vegetable = require('./models/vegetable')
 
 const app = express()
 app.use(express.urlencoded({ extended: true }))
-
-app.set('view engine', 'jsx')
-app.engine('jsx', jsxEngine())
 
 mongoose.connect(process.env.MONGO_URI)
 mongoose.connection.once('open', () => {
     console.log('connected to mongodb')
 })
+
+app.set('view engine', 'jsx')
+app.engine('jsx', jsxEngine())
 
 // Index
 app.get('/vegetables', async (req, res) => {
@@ -27,9 +27,6 @@ app.get('/vegetables', async (req, res) => {
         res.status(400).send({ message: error.message })
     }
 })
-
-// Show
-
 
 // New
 app.get('/vegetables/new', (req, res) => {
@@ -51,6 +48,17 @@ app.post('/vegetables', async (req, res) => {
     }
 })
 
+// Show
+app.get('/vegetables/:id', async (req, res) => {
+    try {
+        const foundVegetable = await Vegetable.findOne({ _id: req.params.id })
+        res.render('vegetables/Show', {
+            vegetable: foundVegetable
+        })
+    } catch (error) {
+        res.status(400).send({ message: error.message })
+    }
+})
 
 app.listen(PORT, () => {
     console.log(`The Port is ACTIVE on ${PORT}`)
